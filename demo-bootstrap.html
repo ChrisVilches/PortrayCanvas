@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <script src="dist/drawcanvas.min.js"></script>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-5">
+          <canvas id="canvas-main1" style="width: 100%; border: 1px solid black;"></canvas>
+        </div>
+        <div class="col-md-7">
+          <canvas id="canvas-main2" style="width: 100%; border: 1px solid black;"></canvas>
+        </div>
+      </div>
+
+
+    <script>
+
+    var canvas1 = new DrawCanvas(document.getElementById("canvas-main1"));
+    var canvas2 = new DrawCanvas(document.getElementById("canvas-main2"));
+
+    </script>
+  </body>
+</html>

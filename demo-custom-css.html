@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <style type="text/css">
+
+    .green-canvas{
+
+      /* If you include the 'color' property, it'll be
+      used as the stroke color */
+      color: #006600;
+      background-color: #fafafa;
+      border: 3px solid black;
+    }
+
+    </style>
+
+    <script src="dist/drawcanvas.min.js"></script>
+  </head>
+  <body>
+
+    <canvas id="canvas-main" class="green-canvas" width="400" height="200"></canvas>
+
+    <script>
+    var canvas = new DrawCanvas(document.getElementById('canvas-main'));
+
+    </script>
+  </body>
+</html>

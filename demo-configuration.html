@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+
+    <script src="dist/drawcanvas.min.js"></script>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-md-5">
+          <p>Open your console to read the canvas events.</p>
+        </div>
+        <div class="col-md-7">
+          <canvas id="canvas-main" style="width: 100%; border: 1px solid black;" height="200"></canvas>
+        </div>
+      </div>
+
+      <!-- Do some things programmatically -->
+
+      <div class="row">
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="canvas.clear()">Clear canvas</button>
+          <button class="btn btn-primary" onclick="canvas.undo()">Undo line</button>
+          <input class="form-control" type="text" id="new-color" placeholder="#FFAA00">
+          <button class="btn btn-primary" onclick="canvas.setColor(document.getElementById('new-color').value);">Change color</button>
+          <button class="btn btn-primary" onclick="canvas.revertDefaultColor()">Default color</button>
+        </button>
+
+      </div>
+    </div>
+
+    <script>
+
+    // Parameterizable canvas
+
+    var canvas = new DrawCanvas(document.getElementById("canvas-main"), {
+
+      lineWidth: 2,
+
+      period: 2,
+
+      onFinishLine: function(c){
+        console.log("A line was finished, here are all the lines:");
+        console.log(c.getLines());
+      },
+
+      onClear: function(){
+        console.log("The canvas was cleared");
+      },
+
+      onUndo: function(line){
+        console.log("This line was deleted:");
+        console.log(line);
+      }
+    });
+
+    </script>
+  </body>
+</html>

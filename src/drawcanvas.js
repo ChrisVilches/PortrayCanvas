@@ -7,6 +7,16 @@ module.exports = class DrawCanvas {
 
   constructor(canvasDOM, options){
 
+    if(canvasDOM.hasOwnProperty('length')){
+      // It probably is a jQuery object
+      canvasDOM = canvasDOM[0];
+    }
+
+    if(canvasDOM.tagName.toLowerCase() !== 'canvas'){
+      throw new Error("Element is not a canvas.");
+    }
+
+
     this.canvas = canvasDOM;
     this.context = this.canvas.getContext('2d');
     this.started = false;
@@ -32,7 +42,7 @@ module.exports = class DrawCanvas {
 
     this.context.strokeStyle = Util.rgb2hex(Util.getStyleProp(this.canvas, 'color'));
     this.context.lineWidth = 5;
-    this.period = 10;
+    this.period = 5;
     this.onFinishLine = null;
     this.onClear = null;
     this.onUndo = null;
@@ -82,6 +92,7 @@ module.exports = class DrawCanvas {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // Grab the previous state, and copy it into both canvas
     if(this.undoHistory.length > 0){
       var prev = this.undoHistory[this.undoHistory.length - 1];
       this.context.drawImage(prev, 0, 0);
@@ -201,7 +212,5 @@ module.exports = class DrawCanvas {
     if(this.onClear != null)
       this.onClear(this);
   }
-
-
 
 }
