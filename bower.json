@@ -1,0 +1,23 @@
+{
+  "name": "drawcanvas",
+  "description": "Parameterizable canvas library that allows the user to draw on it, and get the drawn points.",
+  "main": "dist/drawcanvas.min.js",
+  "authors": [
+    "FeloVilches"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "canvas",
+    "draw",
+    "html5",
+    "javascript"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

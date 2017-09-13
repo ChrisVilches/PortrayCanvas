@@ -1,7 +1,7 @@
 {
   "name": "drawcanvas",
   "version": "1.0.0",
-  "description": "",
+  "description": "Parameterizable canvas library that allows the user to draw on it, and get the drawn points.",
   "main": "src/drawcanvas.js",
   "devDependencies": {
     "jasmine": "^2.8.0",
