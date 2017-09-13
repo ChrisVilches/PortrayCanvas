@@ -114,7 +114,7 @@ module.exports = class DrawCanvas {
     this.context.strokeStyle = Util.rgb2hex(Util.getStyleProp(this.canvas, 'color'));
     this.context.lineWidth = 5;
     this.period = 5;
-    this.onFinishLine = null;
+    this.onLineFinish = null;
     this.onClear = null;
     this.onUndo = null;
 
@@ -129,8 +129,8 @@ module.exports = class DrawCanvas {
     if(typeof options.period === 'number')
       this.period = options.period;
 
-    if(typeof options.onFinishLine === 'function')
-      this.onFinishLine = options.onFinishLine;
+    if(typeof options.onLineFinish === 'function')
+      this.onLineFinish = options.onLineFinish;
 
     if(typeof options.onClear === 'function')
       this.onClear = options.onClear;
@@ -211,7 +211,25 @@ module.exports = class DrawCanvas {
   }
 
 
-  finishLine(){
+  drawLine(points){
+
+    // Add timestamps automatically
+    var time;
+    if(this.lines.length == 0){
+      time = 0;
+      this.firstTimestamp = new Date().getTime();
+    } else {
+      time = new Date().getTime() - this.firstTimestamp;
+    }
+    points.map(e => e.timestamp = time++);
+
+    this.tempLine = points;
+    this.renderer.drawPoints(this.context, points);
+    this.lineFinish();
+  }
+
+
+  lineFinish(){
 
     // Save state in history (creating a new canvas)
     var canvasCopy = document.createElement('canvas');
@@ -226,8 +244,8 @@ module.exports = class DrawCanvas {
 
     // Clears temporary line
     this.tempLine = [];
-    if(this.onFinishLine != null)
-      this.onFinishLine(this);
+    if(this.onLineFinish != null)
+      this.onLineFinish(this);
   }
 
 
@@ -267,7 +285,7 @@ module.exports = class DrawCanvas {
     this.memCtx.drawImage(this.canvas, 0, 0);
     this.points = [];
     this.addDotToTempLine(ev.point);
-    this.finishLine();
+    this.lineFinish();
   }
 
   mouseout(ev){
@@ -341,6 +359,15 @@ class Renderer {
   }
 
   drawPoints(ctx, points) {
+
+    if(points.length == 2){
+      ctx.beginPath();
+      ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasWidth);
+      ctx.lineTo(points[1].x * this.canvasWidth, points[1].y * this.canvasWidth);
+      ctx.stroke();
+      return;
+    }
+
     ctx.beginPath();
 
     ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasWidth);
@@ -359,15 +386,12 @@ class Renderer {
     ctx.stroke();
   }
 
-
   drawDot(ctx, x, y){
     ctx.beginPath();
     ctx.arc(x * this.canvasWidth, y * this.canvasWidth, ctx.lineWidth/2, 0, 2 * Math.PI, false);
     ctx.fillStyle = ctx.strokeStyle;
     ctx.fill();
   }
-
-
 }
 
 module.exports = Renderer;

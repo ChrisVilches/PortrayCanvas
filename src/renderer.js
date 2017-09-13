@@ -7,6 +7,15 @@ class Renderer {
   }
 
   drawPoints(ctx, points) {
+
+    if(points.length == 2){
+      ctx.beginPath();
+      ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasWidth);
+      ctx.lineTo(points[1].x * this.canvasWidth, points[1].y * this.canvasWidth);
+      ctx.stroke();
+      return;
+    }
+
     ctx.beginPath();
 
     ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasWidth);
@@ -25,15 +34,12 @@ class Renderer {
     ctx.stroke();
   }
 
-
   drawDot(ctx, x, y){
     ctx.beginPath();
     ctx.arc(x * this.canvasWidth, y * this.canvasWidth, ctx.lineWidth/2, 0, 2 * Math.PI, false);
     ctx.fillStyle = ctx.strokeStyle;
     ctx.fill();
   }
-
-
 }
 
 module.exports = Renderer;

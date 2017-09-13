@@ -15,6 +15,7 @@
       color: #006600;
       background-color: #fafafa;
       border: 3px solid black;
+      cursor: crosshair;
     }
 
     </style>
@@ -23,10 +24,15 @@
   </head>
   <body>
 
-    <canvas id="canvas-main" class="green-canvas" width="400" height="200"></canvas>
+    <canvas id="canvas-main" class="green-canvas" width="800" height="500"></canvas>
 
     <script>
-    var canvas = new DrawCanvas(document.getElementById('canvas-main'));
+    var canvas = new DrawCanvas(document.getElementById('canvas-main'), {
+      onLineFinish: function(c){
+        console.log("Lines:");
+        console.log(c.getLines());
+      }
+    });
 
     </script>
   </body>
