@@ -22,12 +22,8 @@
 
     <div class="container">
       <div class="row">
-        <div class="col-md-6">
-          <canvas id="canvas-main" class="red-canvas" style="width: 100%;" height=200></canvas>
-        </div>
-
-        <div class="col-md-6">
-          <canvas id="canvas-main2" style="border: 1px solid black; width: 100%;" height=200></canvas>
+        <div class="col-md-12">
+        <canvas id="canvas-main" class="red-canvas" style="width: 100%;" height=400></canvas>
         </div>
       </div>
     </div>
@@ -44,7 +40,7 @@
 
     canvas = new DrawCanvas(document.getElementById("canvas-main"), {
       period: 5,
-      lineWidth: 6,
+      lineWidth: 3,
 
       onFinishLine: function(c){
         console.log(c.getLines())
@@ -58,12 +54,6 @@
         console.log("Se borro una linea");
         console.log(l)
       }
-    });
-
-
-
-    canvas2 = new DrawCanvas(document.getElementById("canvas-main2"), {
-      period: 5,
     });
 
     //constructor(canvasDOM, options, finishLineCallback, clearCallback){

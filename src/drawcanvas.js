@@ -1,26 +1,31 @@
 'use strict';
 
 var Util = require('./util.js');
-var Drawer = require('./drawer.js');
+var Renderer = require('./renderer.js');
 
 module.exports = class DrawCanvas {
 
   constructor(canvasDOM, options){
 
     this.canvas = canvasDOM;
+    this.context = this.canvas.getContext('2d');
     this.started = false;
+    this.context.lineJoin = 'round';
+    this.context.lineCap = 'round';
     this.memCanvas = document.createElement('canvas');
     this.memCanvas.width = this.canvas.width;
     this.memCanvas.height = this.canvas.height;
     this.memCtx = this.memCanvas.getContext('2d');
     this.undoHistory = [];
 
+    this.renderer = new Renderer(this.canvas);
+
     this.init();
     this.setOptions(options);
-    this.canvas.addEventListener('mousedown', this.ev_canvas.bind(this), false);
-    this.canvas.addEventListener('mousemove', this.ev_canvas.bind(this), false);
-    this.canvas.addEventListener('mouseup', this.ev_canvas.bind(this), false);
-    this.canvas.addEventListener('mouseout', this.ev_canvas.bind(this), false);
+    this.canvas.addEventListener('mousedown', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('mousemove', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('mouseup', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('mouseout', this.eventCanvas.bind(this), false);
   }
 
   setOptions(options){
@@ -92,28 +97,27 @@ module.exports = class DrawCanvas {
   init(){
     this.points = [];
     this.count = 0;
-    this.temp = [];
+    this.tempLine = [];
     this.lines = [];
     this.firstTimestamp = -1;
   }
 
-  ev_canvas(ev) {
-    if (this.getX(ev) || this.getX(ev) == 0) {
-      ev._x = this.getX(ev);
-      ev._y = this.getY(ev);
-    }
-
-    ev._x = ev._x + 0.5;
+  eventCanvas(ev) {
+    ev.point = {
+      x: ev.offsetX / this.canvas.offsetWidth,
+      y: ev.offsetY / this.canvas.offsetWidth
+    };
     var func = this[ev.type].bind(this);
     if (func)
       func(ev);
   }
 
-  addDot(point){
+  // Pushes a new dot to the temporary line
+  addDotToTempLine(point){
 
     let time = 0;
 
-    if(this.temp.length == 0 && this.lines.length == 0){
+    if(this.tempLine.length == 0 && this.lines.length == 0){
       time = 0;
       this.firstTimestamp = new Date().getTime();
     } else {
@@ -121,81 +125,67 @@ module.exports = class DrawCanvas {
     }
 
     point.timestamp = time;
-    this.temp.push(point);
+    this.tempLine.push(point);
   }
 
 
   finishLine(){
+
+    // Save state in history (creating a new canvas)
     var canvasCopy = document.createElement('canvas');
-    canvasCopy.width = this.canvas.offsetWidth;
-    canvasCopy.height = this.canvas.offsetHeight;
+    canvasCopy.width = this.canvas.width;
+    canvasCopy.height = this.canvas.height;
     var canvasCopyCtx = canvasCopy.getContext('2d');
     canvasCopyCtx.drawImage(this.canvas, 0, 0);
     this.undoHistory.push(canvasCopy);
-    this.lines.push(this.temp);
-    this.temp = [];
+
+    // Push the new line to the line array
+    this.lines.push(this.tempLine);
+
+    // Clears temporary line
+    this.tempLine = [];
     if(this.onFinishLine != null)
       this.onFinishLine(this);
   }
 
-  getX(ev){
-    return ev.offsetX;
-  }
-
-  getY(ev){
-    return ev.offsetY;
-  }
 
   mousedown(ev) {
     this.count = 0;
-    var point = {
-        x: ev._x / this.canvas.offsetWidth,
-        y: ev._y / this.canvas.offsetWidth
-    };
-    this.addDot(point);
-    this.drawer.drawDot(this.context, point.x, point.y);
-    this.memCtx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
+    this.addDotToTempLine(ev.point);
+    this.renderer.drawDot(this.context, ev.point.x, ev.point.y);
+    this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.memCtx.drawImage(this.canvas, 0, 0);
-    this.points.push(point);
+    this.points.push(ev.point);
     this.started = true;
-
-    this.drawer.drawPoints(this.context, this.points);
+    this.renderer.drawPoints(this.context, this.points);
   }
 
   mousemove(ev) {
-    if (this.started) {
-      var point = {
-          x: ev._x / this.canvas.offsetWidth,
-          y: ev._y / this.canvas.offsetWidth
-      };
 
-        this.count++;
-        if(this.count == this.period){
-          this.addDot(point);
-          this.count = 0;
-        }
-        this.context.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
-        this.context.drawImage(this.memCanvas, 0, 0);
-        this.points.push(point);
-        this.drawer.drawPoints(this.context, this.points);
+    if(!this.started) return;
+
+    this.count++;
+    if(this.count == this.period){
+      this.addDotToTempLine(ev.point);
+      this.count = 0;
     }
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.drawImage(this.memCanvas, 0, 0);
+    this.points.push(ev.point);
+    this.renderer.drawPoints(this.context, this.points);
+
   }
 
   mouseup(ev) {
-    if (this.started) {
-        this.started = false;
-        this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.memCtx.drawImage(this.canvas, 0, 0);
-        this.points = [];
 
-        var point = {
-            x: ev._x / this.canvas.offsetWidth,
-            y: ev._y / this.canvas.offsetWidth
-        };
+    if(!this.started) return;
 
-        this.addDot(point);
-        this.finishLine();
-    }
+    this.started = false;
+    this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.memCtx.drawImage(this.canvas, 0, 0);
+    this.points = [];
+    this.addDotToTempLine(ev.point);
+    this.finishLine();
   }
 
   mouseout(ev){
@@ -211,9 +201,6 @@ module.exports = class DrawCanvas {
     if(this.onClear != null)
       this.onClear(this);
   }
-
-
-
 
 
 

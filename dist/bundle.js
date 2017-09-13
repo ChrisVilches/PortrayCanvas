@@ -72,7 +72,7 @@ var DrawCanvas =
 
 
 var Util = __webpack_require__(1);
-var Drawer = __webpack_require__(2);
+var Renderer = __webpack_require__(2);
 
 module.exports = class DrawCanvas {
 
@@ -89,12 +89,14 @@ module.exports = class DrawCanvas {
     this.memCtx = this.memCanvas.getContext('2d');
     this.undoHistory = [];
 
+    this.renderer = new Renderer(this.canvas);
+
     this.init();
     this.setOptions(options);
-    this.canvas.addEventListener('mousedown', this.ev_canvas.bind(this), false);
-    this.canvas.addEventListener('mousemove', this.ev_canvas.bind(this), false);
-    this.canvas.addEventListener('mouseup', this.ev_canvas.bind(this), false);
-    this.canvas.addEventListener('mouseout', this.ev_canvas.bind(this), false);
+    this.canvas.addEventListener('mousedown', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('mousemove', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('mouseup', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('mouseout', this.eventCanvas.bind(this), false);
   }
 
   setOptions(options){
@@ -166,28 +168,27 @@ module.exports = class DrawCanvas {
   init(){
     this.points = [];
     this.count = 0;
-    this.temp = [];
+    this.tempLine = [];
     this.lines = [];
     this.firstTimestamp = -1;
   }
 
-  ev_canvas(ev) {
-    if (this.getX(ev) || this.getX(ev) == 0) {
-      ev._x = this.getX(ev);
-      ev._y = this.getY(ev);
-    }
-
-    ev._x = ev._x + 0.5;
+  eventCanvas(ev) {
+    ev.point = {
+      x: ev.offsetX / this.canvas.offsetWidth,
+      y: ev.offsetY / this.canvas.offsetWidth
+    };
     var func = this[ev.type].bind(this);
     if (func)
       func(ev);
   }
 
-  addDot(point){
+  // Pushes a new dot to the temporary line
+  addDotToTempLine(point){
 
     let time = 0;
 
-    if(this.temp.length == 0 && this.lines.length == 0){
+    if(this.tempLine.length == 0 && this.lines.length == 0){
       time = 0;
       this.firstTimestamp = new Date().getTime();
     } else {
@@ -195,81 +196,67 @@ module.exports = class DrawCanvas {
     }
 
     point.timestamp = time;
-    this.temp.push(point);
+    this.tempLine.push(point);
   }
 
 
   finishLine(){
+
+    // Save state in history (creating a new canvas)
     var canvasCopy = document.createElement('canvas');
-    canvasCopy.width = this.canvas.offsetWidth;
-    canvasCopy.height = this.canvas.offsetHeight;
+    canvasCopy.width = this.canvas.width;
+    canvasCopy.height = this.canvas.height;
     var canvasCopyCtx = canvasCopy.getContext('2d');
     canvasCopyCtx.drawImage(this.canvas, 0, 0);
     this.undoHistory.push(canvasCopy);
-    this.lines.push(this.temp);
-    this.temp = [];
+
+    // Push the new line to the line array
+    this.lines.push(this.tempLine);
+
+    // Clears temporary line
+    this.tempLine = [];
     if(this.onFinishLine != null)
       this.onFinishLine(this);
   }
 
-  getX(ev){
-    return ev.offsetX;
-  }
-
-  getY(ev){
-    return ev.offsetY;
-  }
 
   mousedown(ev) {
     this.count = 0;
-    var point = {
-        x: ev._x / this.canvas.offsetWidth,
-        y: ev._y / this.canvas.offsetWidth
-    };
-    this.addDot(point);
-    this.drawDot(this.context, point.x, point.y);
-    this.memCtx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
+    this.addDotToTempLine(ev.point);
+    this.renderer.drawDot(this.context, ev.point.x, ev.point.y);
+    this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.memCtx.drawImage(this.canvas, 0, 0);
-    this.points.push(point);
+    this.points.push(ev.point);
     this.started = true;
-
-    this.drawPoints(this.context, this.points);
+    this.renderer.drawPoints(this.context, this.points);
   }
 
   mousemove(ev) {
-    if (this.started) {
-      var point = {
-          x: ev._x / this.canvas.offsetWidth,
-          y: ev._y / this.canvas.offsetWidth
-      };
 
-        this.count++;
-        if(this.count == this.period){
-          this.addDot(point);
-          this.count = 0;
-        }
-        this.context.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
-        this.context.drawImage(this.memCanvas, 0, 0);
-        this.points.push(point);
-        this.drawPoints(this.context, this.points);
+    if(!this.started) return;
+
+    this.count++;
+    if(this.count == this.period){
+      this.addDotToTempLine(ev.point);
+      this.count = 0;
     }
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.drawImage(this.memCanvas, 0, 0);
+    this.points.push(ev.point);
+    this.renderer.drawPoints(this.context, this.points);
+
   }
 
   mouseup(ev) {
-    if (this.started) {
-        this.started = false;
-        this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.memCtx.drawImage(this.canvas, 0, 0);
-        this.points = [];
 
-        var point = {
-            x: ev._x / this.canvas.offsetWidth,
-            y: ev._y / this.canvas.offsetWidth
-        };
+    if(!this.started) return;
 
-        this.addDot(point);
-        this.finishLine();
-    }
+    this.started = false;
+    this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.memCtx.drawImage(this.canvas, 0, 0);
+    this.points = [];
+    this.addDotToTempLine(ev.point);
+    this.finishLine();
   }
 
   mouseout(ev){
@@ -287,31 +274,6 @@ module.exports = class DrawCanvas {
   }
 
 
-  drawDot(ctx, x, y){
-    ctx.beginPath();
-    ctx.arc(x * this.canvas.width, y * this.canvas.width, ctx.lineWidth/2, 0, 2 * Math.PI, false);
-    ctx.fillStyle = ctx.strokeStyle;
-    ctx.fill();
-  }
-
-  drawPoints(ctx, points) {
-    ctx.beginPath();
-
-    ctx.moveTo(points[0].x * this.canvas.width, points[0].y * this.canvas.width);
-    for (var i = 1; i < points.length - 2; i++) {
-        var c = ((points[i].x* this.canvas.width) + (points[i + 1].x* this.canvas.width)) / 2,
-            d = ((points[i].y * this.canvas.width) + (points[i + 1].y * this.canvas.width)) / 2;
-        ctx.quadraticCurveTo(points[i].x * this.canvas.width, points[i].y * this.canvas.width, c, d);
-    }
-    if(i < points.length - 1){
-      ctx.quadraticCurveTo(
-        points[i].x * this.canvas.width,
-        points[i].y * this.canvas.width,
-        points[i + 1].x * this.canvas.width,
-        points[i + 1].y * this.canvas.width);
-    }
-    ctx.stroke();
-  }
 
 }
 
@@ -363,14 +325,43 @@ module.exports = Util;
 "use strict";
 
 
-class Drawer {
+class Renderer {
+
+  constructor(canvas){
+    this.canvasWidth = canvas.width;
+  }
+
+  drawPoints(ctx, points) {
+    ctx.beginPath();
+
+    ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasWidth);
+    for (var i = 1; i < points.length - 2; i++) {
+        var c = ((points[i].x* this.canvasWidth) + (points[i + 1].x* this.canvasWidth)) / 2,
+            d = ((points[i].y * this.canvasWidth) + (points[i + 1].y * this.canvasWidth)) / 2;
+        ctx.quadraticCurveTo(points[i].x * this.canvasWidth, points[i].y * this.canvasWidth, c, d);
+    }
+    if(i < points.length - 1){
+      ctx.quadraticCurveTo(
+        points[i].x * this.canvasWidth,
+        points[i].y * this.canvasWidth,
+        points[i + 1].x * this.canvasWidth,
+        points[i + 1].y * this.canvasWidth);
+    }
+    ctx.stroke();
+  }
 
 
+  drawDot(ctx, x, y){
+    ctx.beginPath();
+    ctx.arc(x * this.canvasWidth, y * this.canvasWidth, ctx.lineWidth/2, 0, 2 * Math.PI, false);
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.fill();
+  }
 
 
 }
 
-module.exports = Drawer;
+module.exports = Renderer;
 
 
 /***/ })
