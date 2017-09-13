@@ -6,13 +6,54 @@
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
 
+    <style type="text/css">
+
+    .red-canvas {
+      background-color: #fefefe;
+      color: #770000;
+      border: 3px solid black;
+    }
+
+    </style>
+
     <script type="text/javascript">
 
+    function rgb2hex(rgb){
 
+      var rgbRegex = new RegExp(/^rgb\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*\)$/);
+
+      var rgb = rgb.match(rgbRegex);
+
+      if(rgb == null)
+        return '#000000';
+
+      function process(component){
+        let c = Number(component);
+        if(c > 255) c = 255;
+        c = c.toString(16);
+        if(c.length == 1)
+          c = '0' + c;
+        return c;
+      }
+      return `#${process(rgb[1])}${process(rgb[2])}${process(rgb[3])}`;
+    }
+    console.assert(rgb2hex('rgbsadasd(0, 0, 0)') == '#000000');
+    console.assert(rgb2hex('rgb(0, 0, 0)') == '#000000');
+    console.assert(rgb2hex('rgb(255, 255, 255)') == '#ffffff');
+    console.assert(rgb2hex('rgb(2, 255, 2)') == '#02ff02');
+    console.assert(rgb2hex('rgb(10, 170, 10)') == '#0aaa0a');
+
+    function getStyleProp(elem, prop){
+      if(window.getComputedStyle)
+        return window.getComputedStyle(elem, null).getPropertyValue(prop);
+      else if(elem.currentStyle)
+        return elem.currentStyle[prop];
+    }
 
     class DotCanvas {
 
       constructor(canvasDOM, options){
+
         this.canvas = canvasDOM;
         this.context = this.canvas.getContext('2d');
         this.started = false;
@@ -34,7 +75,7 @@
 
       setOptions(options){
 
-        this.context.strokeStyle = "#000000";
+        this.context.strokeStyle = rgb2hex(getStyleProp(this.canvas, 'color'));
         this.context.lineWidth = 5;
         this.period = 10;
         this.onFinishLine = null;
@@ -85,26 +126,10 @@
 
       }
 
-      getPrettyLines(){
-        var list = [];
-        for(var i=0; i<this.lines.length; i++){
-          var dots = [];
-          for(var j=0; j<this.lines[i][0].length; j++){
-            dots.push({
-              x: this.lines[i][0][j],
-              y: this.lines[i][1][j],
-              timestamp: this.lines[i][2][j]
-            });
-          }
-          list.push(dots);
-        }
-        return list;
-      }
-
       init(){
         this.points = [];
         this.count = 0;
-        this.temp = [[], [], []];
+        this.temp = [];
         this.lines = [];
         this.firstTimestamp = -1;
       }
@@ -122,17 +147,20 @@
       }
 
       addDot(point){
-        let x = point.x;
-        let y = point.y;
-        this.temp[0].push(x);
-        this.temp[1].push(y);
-        if(this.temp[2].length == 0 && this.lines.length == 0){
-          this.temp[2].push(0);
+
+        let time = 0;
+
+        if(this.temp.length == 0 && this.lines.length == 0){
+          time = 0;
           this.firstTimestamp = new Date().getTime();
         } else {
-          this.temp[2].push(new Date().getTime() - this.firstTimestamp);
+          time = new Date().getTime() - this.firstTimestamp;
         }
+
+        point.timestamp = time;
+        this.temp.push(point);
       }
+
 
       finishLine(){
         var canvasCopy = document.createElement('canvas');
@@ -142,7 +170,7 @@
         canvasCopyCtx.drawImage(this.canvas, 0, 0);
         this.undoHistory.push(canvasCopy);
         this.lines.push(this.temp);
-        this.temp = [[], [], []];
+        this.temp = [];
         if(this.onFinishLine != null)
           this.onFinishLine(this);
       }
@@ -157,15 +185,10 @@
 
       mousedown(ev) {
         this.count = 0;
-
-        console.log(ev.offsetX + `[0 - ${this.canvas.offsetWidth}]`)
-
-
         var point = {
             x: ev._x / this.canvas.offsetWidth,
             y: ev._y / this.canvas.offsetWidth
         };
-
         this.addDot(point);
         this.drawDot(this.context, point.x, point.y);
         this.memCtx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight);
@@ -223,7 +246,7 @@
         this.init();
 
         if(this.onClear != null)
-          this.onClear();
+          this.onClear(this);
       }
 
       drawDot(ctx, x, y){
@@ -266,7 +289,7 @@
     <div class="container">
       <div class="row">
         <div class="col-md-6">
-          <canvas id="canvas-main" style="border: 1px solid black; width: 100%;" height=500></canvas>
+          <canvas id="canvas-main" class="red-canvas" style="width: 100%;" height=200></canvas>
         </div>
 
         <div class="col-md-6">
@@ -278,24 +301,27 @@
 
 
     <button onclick="canvas.clear()">Clear</button>
+    <button onclick="canvas.undo()">Undo</button>
 
 
 
     <script>
 
+
     canvas = new DotCanvas(document.getElementById("canvas-main"), {
       period: 5,
       lineWidth: 6,
-      color: "#404769",
 
       onFinishLine: function(c){
-        console.log(c.lines)
+        console.log(c.getLines())
       },
 
       onClear: function(){
         console.log("Clear")
       }
     });
+
+    
 
     canvas2 = new DotCanvas(document.getElementById("canvas-main2"), {
       period: 5,
