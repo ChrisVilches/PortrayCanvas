@@ -5,7 +5,7 @@
     "email": "felovilches@gmail.com",
     "url": "https://felovilches.github.io/"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parameterizable canvas library that allows you to draw on it, and get the drawn points.",
   "keywords": ["canvas", "draw", "html", "javascript", "web", "graphic", "graphical", "design", "art"],
   "main": "src/portraycanvas.js",
