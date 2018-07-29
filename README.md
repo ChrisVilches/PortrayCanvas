@@ -1,4 +1,4 @@
-# Draw Canvas
+# PortrayCanvas
 
 A library that allows the user to draw on a canvas, and extract the drawn points. Useful for getting handwritten user input.
 
@@ -8,6 +8,12 @@ Clone the repository and open the `.html` files on your browser to see examples.
 
 ```bash
 npm install portraycanvas --save
+```
+
+or
+
+```bash
+yarn add portraycanvas
 ```
 
 ## Usage
@@ -21,6 +27,9 @@ Your html:
 Your Javascript:
 
 ```js
+
+import PortrayCanvas from 'portraycanvas';
+
 var canvas = new PortrayCanvas(document.getElementById("canvas-main"), {
 
   // All these attributes are optional.
