@@ -4,20 +4,37 @@
     <meta charset="utf-8">
     <title></title>
 
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <script src="dist/drawcanvas.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <style type="text/css">
+    #canvas-main{
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      touch-action: none;
+      width: 100%;
+      border: 1px solid black;
+    }
+    </style>
+
+    <script src="dist/portraycanvas.min.js"></script>
   </head>
   <body>
 
-    <div class="container">
+
+    <div class="container-fluid">
+
+      <h2 class="mt-2">PortrayCanvas demo</h2>
+
       <div class="row">
-        <div class="col-md-5">
+        <div class="col-md-7">
           <p>Open your console to read the canvas events.</p>
 
           <p>Try pasting this code into your console:</p>
 
-          <pre>
+          <pre style="background-color: #fafafa; padding: 5px;" class="mb-4"><code>
 lines = [
 [{x:0.072, y:0.253},{x:0.063, y:0.434}],
 [{x:0.070, y:0.345},{x:0.156, y:0.343}],
@@ -36,37 +53,50 @@ lines = [
 [{x:0.613, y:0.423},{x:0.722, y:0.410}]]
 
 lines.map(line => canvas.drawLine(line));
-</pre>
+</code></pre>
         </div>
-        <div class="col-md-7">
-          <canvas id="canvas-main" style="width: 100%; border: 1px solid black;" height="200"></canvas>
+        <div class="col-md-5 mb-2">
+          <canvas id="canvas-main" height="200"></canvas>
+          <div id="borrame1"></div><br>
+          <div id="borrame2"></div><br>
+          <div id="borrame3"></div><br>
         </div>
       </div>
 
       <!-- Do some things programmatically -->
 
-      <div class="row">
+      <div class="row mb-2">
+        <div class="col-md-7">
+          <div class="btn-group" role="group">
+            <button class="btn btn-secondary" onclick="canvas.clear()">Clear canvas</button>
+            <button class="btn btn-secondary" onclick="canvas.undo()">Undo line</button>
+            <button class="btn btn-secondary" onclick="console.log(canvas.getLines())">Console print all lines</button>
+          </div>
+        </div>
+      </div>
 
-        <div class="btn-group">
-          <button class="btn btn-primary" onclick="canvas.clear()">Clear canvas</button>
-          <button class="btn btn-primary" onclick="canvas.undo()">Undo line</button>
-          <input class="form-control" type="text" id="new-color" placeholder="#FFAA00">
-          <button class="btn btn-primary" onclick="canvas.setColor(document.getElementById('new-color').value);">Change color</button>
-          <button class="btn btn-primary" onclick="canvas.revertDefaultColor()">Default color</button>
-        </button>
-
+      <div class="row mb-4">
+        <div class="col-md-5">
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="canvas.setColor(document.getElementById('new-color').value);">Change color</button>
+            <button class="btn btn-secondary" onclick="canvas.revertDefaultColor()">Default color</button>
+            <input class="form-control" type="text" id="new-color" placeholder="#FFAA00">
+          </div>
+        </div>
       </div>
     </div>
+
+
 
     <script>
 
     // Parameterizable canvas
 
-    var canvas = new DrawCanvas(document.getElementById("canvas-main"), {
+    var canvas = new PortrayCanvas(document.getElementById("canvas-main"), {
 
       lineWidth: 2,
 
-      period: 200,
+      period: 20,
 
       onLineFinish: function(c){
         console.log("A line was finished, here are all the lines:");

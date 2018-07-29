@@ -2,23 +2,22 @@ var path = require('path');
 var webpack = require('webpack');
 var Uglify = require('uglifyjs-webpack-plugin');
 
-var src = './src/drawcanvas.js';
+var src = './src/portraycanvas.js';
 
 module.exports = {
     entry: {
-      'drawcanvas': src,
-      'drawcanvas.min': src
+      'portraycanvas': src,
+      'portraycanvas.min': src
     },
     devtool: 'source-map',
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: '[name].js',
       libraryTarget: 'var',
-      library: 'DrawCanvas'
+      library: 'PortrayCanvas'
     },
     plugins: [
       new Uglify({
-        include: /\.min\.js$/,
-        minimize: true
+        include: /\.min\.js$/
       })]
 };

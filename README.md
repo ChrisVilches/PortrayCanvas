@@ -1,4 +1,4 @@
-# DrawCanvas
+# Draw Canvas
 
 A library that allows the user to draw on a canvas, and extract the drawn points. Useful for getting handwritten user input.
 
@@ -7,7 +7,7 @@ Clone the repository and open the `.html` files on your browser to see examples.
 ## Download
 
 ```bash
-bower install drawcanvas
+npm install portraycanvas --save
 ```
 
 ## Usage
@@ -21,7 +21,7 @@ Your html:
 Your Javascript:
 
 ```js
-var canvas = new DrawCanvas(document.getElementById("canvas-main"), {
+var canvas = new PortrayCanvas(document.getElementById("canvas-main"), {
 
   // All these attributes are optional.
 
@@ -85,3 +85,26 @@ And then in your HTML:
 ```html
 <canvas id="canvas-main" class="green-canvas" width="800" height="500"></canvas>
 ```
+
+## Recommended CSS
+
+You can make the canvas unselectable by applying the following CSS:
+
+```css
+.my-canvas{
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */      
+}
+```
+
+You can make the canvas unscrollable, which is useful for mobile pages, so that it doesn't unintentionally scroll while touching it, by applying the following CSS to your canvas.
+
+```css
+.my-canvas{
+  touch-action: none;
+}
+```
+
+In future versions, these CSS rules will be applied automatically by the library.

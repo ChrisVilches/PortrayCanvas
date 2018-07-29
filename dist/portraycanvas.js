@@ -1,4 +1,4 @@
-var DrawCanvas =
+var PortrayCanvas =
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -74,7 +74,8 @@ var DrawCanvas =
 var Util = __webpack_require__(1);
 var Renderer = __webpack_require__(2);
 
-module.exports = class DrawCanvas {
+
+module.exports = class PortrayCanvas {
 
   constructor(canvasDOM, options){
 
@@ -86,7 +87,6 @@ module.exports = class DrawCanvas {
     if(canvasDOM.tagName.toLowerCase() !== 'canvas'){
       throw new Error("Element is not a canvas.");
     }
-
 
     this.canvas = canvasDOM;
     this.context = this.canvas.getContext('2d');
@@ -107,6 +107,9 @@ module.exports = class DrawCanvas {
     this.canvas.addEventListener('mousemove', this.eventCanvas.bind(this), false);
     this.canvas.addEventListener('mouseup', this.eventCanvas.bind(this), false);
     this.canvas.addEventListener('mouseout', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('touchstart', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('touchend', this.eventCanvas.bind(this), false);
+    this.canvas.addEventListener('touchmove', this.eventCanvas.bind(this), false);
   }
 
   setOptions(options){
@@ -185,13 +188,39 @@ module.exports = class DrawCanvas {
   }
 
   eventCanvas(ev) {
-    ev.point = {
-      x: ev.offsetX / this.canvas.offsetWidth,
-      y: ev.offsetY / this.canvas.offsetWidth
-    };
-    var func = this[ev.type].bind(this);
-    if (func)
-      func(ev);
+
+    let point = {};
+
+    if(ev.type.charAt(0) === 't'){
+      // touch
+      var touch = ev.touches[0];
+
+      if(typeof touch === "undefined"){
+        point = this.currPoint;
+      } else {
+        var rect = this.canvas.getBoundingClientRect();
+        point.x = (touch.clientX - rect.left)/this.canvas.offsetWidth;
+        point.y = (touch.clientY - rect.top)/this.canvas.offsetWidth;
+      }
+
+    } else {
+      // mouse
+      point.x = ev.offsetX / this.canvas.offsetWidth;
+      point.y = ev.offsetY / this.canvas.offsetWidth;
+    }
+
+    this.currPoint = point;
+
+    switch(ev.type){
+
+      case 'mousedown': this.eventStart(point); break;
+      case 'mousemove': this.eventMove(point); break;
+      case 'mouseup': this.eventEnd(point); break;
+      case 'touchstart': this.eventStart(point); break;
+      case 'touchmove': this.eventMove(point); break;
+      case 'touchend': this.eventEnd(point); break;
+
+    }
   }
 
   // Pushes a new dot to the temporary line
@@ -209,25 +238,6 @@ module.exports = class DrawCanvas {
     point.timestamp = time;
     this.tempLine.push(point);
   }
-
-
-  drawLine(points){
-
-    // Add timestamps automatically
-    var time;
-    if(this.lines.length == 0){
-      time = 0;
-      this.firstTimestamp = new Date().getTime();
-    } else {
-      time = new Date().getTime() - this.firstTimestamp;
-    }
-    points.map(e => e.timestamp = time++);
-
-    this.tempLine = points;
-    this.renderer.drawPoints(this.context, points);
-    this.lineFinish();
-  }
-
 
   lineFinish(){
 
@@ -248,49 +258,40 @@ module.exports = class DrawCanvas {
       this.onLineFinish(this);
   }
 
-
-  mousedown(ev) {
+  eventStart(point){
     this.count = 0;
-    this.addDotToTempLine(ev.point);
-    this.renderer.drawDot(this.context, ev.point.x, ev.point.y);
+    this.addDotToTempLine(point);
+    this.renderer.drawDot(this.context, point.x, point.y);
     this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.memCtx.drawImage(this.canvas, 0, 0);
-    this.points.push(ev.point);
+    this.points.push(point);
     this.started = true;
     this.renderer.drawPoints(this.context, this.points);
   }
 
-  mousemove(ev) {
-
+  eventEnd(point){
     if(!this.started) return;
-
-    this.count++;
-    if(this.count == this.period){
-      this.addDotToTempLine(ev.point);
-      this.count = 0;
-    }
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.context.drawImage(this.memCanvas, 0, 0);
-    this.points.push(ev.point);
-    this.renderer.drawPoints(this.context, this.points);
-
-  }
-
-  mouseup(ev) {
-
-    if(!this.started) return;
-
     this.started = false;
     this.memCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.memCtx.drawImage(this.canvas, 0, 0);
     this.points = [];
-    this.addDotToTempLine(ev.point);
+    this.addDotToTempLine(point);
     this.lineFinish();
   }
 
-  mouseout(ev){
-    this.mouseup(ev);
+  eventMove(point){
+    if(!this.started) return;
+    this.count++;
+    if(this.count == this.period){
+      this.addDotToTempLine(point);
+      this.count = 0;
+    }
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.drawImage(this.memCanvas, 0, 0);
+    this.points.push(point);
+    this.renderer.drawPoints(this.context, this.points);
   }
+
 
   clear() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -399,4 +400,4 @@ module.exports = Renderer;
 
 /***/ })
 /******/ ]);
-//# sourceMappingURL=drawcanvas.js.map
+//# sourceMappingURL=portraycanvas.js.map
