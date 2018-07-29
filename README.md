@@ -65,6 +65,9 @@ var canvas = new PortrayCanvas(document.getElementById("canvas-main"), {
 You can programmatically call these methods:
 
 ```js
+
+canvas.getLines(); // Get all lines
+
 canvas.clear(); // Clear the canvas
 
 canvas.undo(); // Remove last line you drew
