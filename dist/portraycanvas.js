@@ -112,6 +112,23 @@ module.exports = class PortrayCanvas {
     this.canvas.addEventListener('touchmove', this.eventCanvas.bind(this), false);
   }
 
+  drawLine(points){
+
+    // Add timestamps automatically
+    var time;
+    if(this.lines.length == 0){
+      time = 0;
+      this.firstTimestamp = new Date().getTime();
+    } else {
+      time = new Date().getTime() - this.firstTimestamp;
+    }
+    points.map(e => e.timestamp = time++);
+
+    this.tempLine = points;
+    this.renderer.drawPoints(this.context, points);
+    this.lineFinish();
+  }
+
   setOptions(options){
 
     this.context.strokeStyle = Util.rgb2hex(Util.getStyleProp(this.canvas, 'color'));
