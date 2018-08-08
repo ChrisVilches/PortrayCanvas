@@ -16,6 +16,7 @@
       touch-action: none;
       width: 100%;
       border: 1px solid black;
+      color: #66a3ff;
     }
     </style>
 
@@ -29,7 +30,7 @@
       <h2 class="mt-2">PortrayCanvas demo</h2>
 
       <div class="row">
-        <div class="col-md-7">
+        <div class="col-md-4">
           <p>Open your console (<a href="http://google.com/#q=How+to+open+javascript+console" target="_blank">How?</a>) to read the canvas events.</p>
 
           <p>Try pasting this code into your console:</p>
@@ -55,7 +56,7 @@ lines = [
 lines.map(line => canvas.drawLine(line));
 </code></pre>
         </div>
-        <div class="col-md-5 mb-2">
+        <div class="col-md-4 mb-2 col-md-offset-4">
           <canvas id="canvas-main" height="200"></canvas>
           <div id="borrame1"></div><br>
           <div id="borrame2"></div><br>
@@ -94,7 +95,7 @@ lines.map(line => canvas.drawLine(line));
 
     var canvas = new PortrayCanvas(document.getElementById("canvas-main"), {
 
-      lineWidth: 2,
+      lineWidth: 4,
 
       period: 20,
 
