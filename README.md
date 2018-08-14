@@ -2,7 +2,7 @@
 
 A library that allows the user to draw on a canvas, and extract the drawn points. Useful for getting handwritten user input.
 
-Clone the repository and open the `.html` files on your browser to see examples.
+[Live demo](https://felovilches.com/tools/PortrayCanvas/)
 
 ## Download
 
