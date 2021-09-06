@@ -137,6 +137,11 @@ module.exports = class PortrayCanvas {
 
     let point = {};
 
+    // If these values are memoized, and the user resizes the window, the
+    // point position will become off (by a lot).
+    this.totalWidth = this.canvas.offsetWidth - this.borderHorizontal();
+    this.totalHeight = this.canvas.offsetHeight - this.borderVertical();
+
     if(ev.type.charAt(0) === 't'){
       // touch
       var touch = ev.touches[0];
@@ -145,14 +150,15 @@ module.exports = class PortrayCanvas {
         point = this.currPoint;
       } else {
         var rect = this.canvas.getBoundingClientRect();
-        point.x = (touch.clientX - rect.left)/this.canvas.offsetWidth;
-        point.y = (touch.clientY - rect.top)/this.canvas.offsetWidth;
+
+        point.x = (touch.clientX - rect.left) / this.totalWidth;
+        point.y = (touch.clientY - rect.top) / this.totalHeight;
       }
 
     } else {
       // mouse
-      point.x = ev.offsetX / this.canvas.offsetWidth;
-      point.y = ev.offsetY / this.canvas.offsetWidth;
+      point.x = ev.offsetX / this.totalWidth;
+      point.y = ev.offsetY / this.totalHeight;
     }
 
     this.currPoint = point;
@@ -167,6 +173,21 @@ module.exports = class PortrayCanvas {
       case 'touchend': this.eventEnd(point); break;
 
     }
+  }
+
+  // Gets the computed horizontal border width.
+  borderHorizontal(){
+    return this.borderWidth('left') + this.borderWidth('right');
+  }
+
+  // Gets the computed vertical border width.
+  borderVertical(){
+    return this.borderWidth('top') + this.borderWidth('bottom');
+  }
+
+  borderWidth(side){
+    var value = Util.getStyleProp(this.canvas, 'border-' + side + '-width') || '';
+    return +value.replace('px', '');
   }
 
   // Pushes a new dot to the temporary line

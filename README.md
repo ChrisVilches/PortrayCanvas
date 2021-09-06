@@ -2,7 +2,7 @@
 
 A library that allows the user to draw on a canvas, and extract the drawn points. Useful for getting handwritten user input.
 
-[Live demo](https://felovilches.com/tools/PortrayCanvas/)
+[Live demo](http://cloud.chrisvilches.com/live_demos/PortrayCanvas/)
 
 ## Download
 
@@ -76,6 +76,16 @@ canvas.setColor('#ff0000'); // Change the stroke color
 
 canvas.revertDefaultColor(); // If you had changed the color, go back to the default one.
 ```
+
+## Issues
+
+It seems it's necessary that the canvas element defines `width` and `height`.
+
+```html
+<canvas id="main-canvas" width="500" height="700">
+```
+
+This issue is being investigated. It might still work without them in some situations, but make sure the canvas works correctly even after resizing the window.
 
 ## Styling
 

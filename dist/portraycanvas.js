@@ -208,6 +208,11 @@ module.exports = class PortrayCanvas {
 
     let point = {};
 
+    // If these values are memoized, and the user resizes the window, the
+    // point position will become off (by a lot).
+    this.totalWidth = this.canvas.offsetWidth - this.borderHorizontal();
+    this.totalHeight = this.canvas.offsetHeight - this.borderVertical();
+
     if(ev.type.charAt(0) === 't'){
       // touch
       var touch = ev.touches[0];
@@ -216,14 +221,15 @@ module.exports = class PortrayCanvas {
         point = this.currPoint;
       } else {
         var rect = this.canvas.getBoundingClientRect();
-        point.x = (touch.clientX - rect.left)/this.canvas.offsetWidth;
-        point.y = (touch.clientY - rect.top)/this.canvas.offsetWidth;
+
+        point.x = (touch.clientX - rect.left) / this.totalWidth;
+        point.y = (touch.clientY - rect.top) / this.totalHeight;
       }
 
     } else {
       // mouse
-      point.x = ev.offsetX / this.canvas.offsetWidth;
-      point.y = ev.offsetY / this.canvas.offsetWidth;
+      point.x = ev.offsetX / this.totalWidth;
+      point.y = ev.offsetY / this.totalHeight;
     }
 
     this.currPoint = point;
@@ -238,6 +244,21 @@ module.exports = class PortrayCanvas {
       case 'touchend': this.eventEnd(point); break;
 
     }
+  }
+
+  // Gets the computed horizontal border width.
+  borderHorizontal(){
+    return this.borderWidth('left') + this.borderWidth('right');
+  }
+
+  // Gets the computed vertical border width.
+  borderVertical(){
+    return this.borderWidth('top') + this.borderWidth('bottom');
+  }
+
+  borderWidth(side){
+    var value = Util.getStyleProp(this.canvas, 'border-' + side + '-width') || '';
+    return +value.replace('px', '');
   }
 
   // Pushes a new dot to the temporary line
@@ -374,39 +395,40 @@ class Renderer {
 
   constructor(canvas){
     this.canvasWidth = canvas.width;
+    this.canvasHeight = canvas.height;
   }
 
   drawPoints(ctx, points) {
 
     if(points.length == 2){
       ctx.beginPath();
-      ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasWidth);
-      ctx.lineTo(points[1].x * this.canvasWidth, points[1].y * this.canvasWidth);
+      ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasHeight);
+      ctx.lineTo(points[1].x * this.canvasWidth, points[1].y * this.canvasHeight);
       ctx.stroke();
       return;
     }
 
     ctx.beginPath();
 
-    ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasWidth);
+    ctx.moveTo(points[0].x * this.canvasWidth, points[0].y * this.canvasHeight);
     for (var i = 1; i < points.length - 2; i++) {
         var c = ((points[i].x* this.canvasWidth) + (points[i + 1].x* this.canvasWidth)) / 2,
-            d = ((points[i].y * this.canvasWidth) + (points[i + 1].y * this.canvasWidth)) / 2;
-        ctx.quadraticCurveTo(points[i].x * this.canvasWidth, points[i].y * this.canvasWidth, c, d);
+            d = ((points[i].y * this.canvasHeight) + (points[i + 1].y * this.canvasHeight)) / 2;
+        ctx.quadraticCurveTo(points[i].x * this.canvasWidth, points[i].y * this.canvasHeight, c, d);
     }
     if(i < points.length - 1){
       ctx.quadraticCurveTo(
         points[i].x * this.canvasWidth,
-        points[i].y * this.canvasWidth,
+        points[i].y * this.canvasHeight,
         points[i + 1].x * this.canvasWidth,
-        points[i + 1].y * this.canvasWidth);
+        points[i + 1].y * this.canvasHeight);
     }
     ctx.stroke();
   }
 
   drawDot(ctx, x, y){
     ctx.beginPath();
-    ctx.arc(x * this.canvasWidth, y * this.canvasWidth, ctx.lineWidth/2, 0, 2 * Math.PI, false);
+    ctx.arc(x * this.canvasWidth, y * this.canvasHeight, ctx.lineWidth/2, 0, 2 * Math.PI, false);
     ctx.fillStyle = ctx.strokeStyle;
     ctx.fill();
   }
