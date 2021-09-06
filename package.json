@@ -5,7 +5,7 @@
     "email": "felovilches@gmail.com",
     "url": "https://felovilches.github.io/"
   },
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Parameterizable canvas library that allows you to draw on it, and get the drawn points.",
   "keywords": [
     "canvas",
