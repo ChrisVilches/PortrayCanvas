@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>PortrayCanvas Demo</title>
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<head>
+  <meta charset="utf-8">
+  <title>PortrayCanvas Demo</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <style type="text/css">
-    a{
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <style type="text/css">
+    a {
       color: #6592A8;
       font-weight: bold;
     }
 
-    a:hover{
+    a:hover {
       color: #345E73;
     }
 
-    #canvas-main{
+    #canvas-main {
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
@@ -29,7 +31,7 @@
       color: #000;
     }
 
-    #lines-data-container{
+    #lines-data-container {
       height: 150px;
       overflow-y: scroll;
       background-color: #6592A8;
@@ -45,90 +47,81 @@
       }
     }
 
-    .small-icon:hover, .small-icon:active, .small-icon:focus{
+    .small-icon:hover,
+    .small-icon:active,
+    .small-icon:focus {
       text-decoration: none;
     }
 
-    .small-icon img{
+    .small-icon img {
       width: 23px;
       opacity: 0.5;
       transition: 1.5s;
     }
 
-    .small-icon img:hover{
+    .small-icon img:hover {
       opacity: 1;
     }
-    </style>
+  </style>
 
-    <script src="dist/portraycanvas.min.js"></script>
-  </head>
-  <body>
-    <div class="container-fluid">
-      <h2 class="mt-4 mb-4">PortrayCanvas Demo</h2>
+  <script src="dist/portraycanvas.min.js"></script>
+</head>
 
-      <p>
-        Javascript library for handwriting and drawing. Useful for getting handwritten user input.
-      </p>
+<body>
+  <div class="container-fluid">
+    <h2 class="mt-4 mb-4">PortrayCanvas Demo</h2>
 
-      <div class="row mb-4">
-        <div class="col-md-12">
-          <a href="https://github.com/ChrisVilches/PortrayCanvas" class="small-icon mr-2" target="_blank">
-            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/github.svg"/>
-          </a>
+    <p>
+      Javascript library for handwriting and drawing. Useful for getting handwritten user input.
+    </p>
 
-          <a href="https://www.npmjs.com/package/portraycanvas" class="small-icon mr-2" target="_blank">
-            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/npm.svg"/>
-          </a>
-          <small>By <a href="http://www.chrisvilches.com/" target="_blank">Chris Vilches</a></small>
-        </div>
-      </div>
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <a href="https://github.com/ChrisVilches/PortrayCanvas" class="small-icon mr-2" target="_blank">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/github.svg" />
+        </a>
 
-      <div class="row">
-        <div class="mb-2 col-md-6 col-lg-4">
-          <canvas id="canvas-main" height="500" width="500"></canvas>
-        </div>
-
-        <div class="mb-2 col-md-6 col-lg-8">
-          <pre id="lines-data-container"></pre>
-        </div>
-      </div>
-
-      <!-- Do some things programmatically -->
-
-      <div class="row mb-4">
-        <div class="col-md-7">
-          <button class="btn btn-secondary" onclick="canvas.clear()">Clear</button>
-          <button class="btn btn-secondary" onclick="canvas.undo()">Undo line</button>
-        </div>
-      </div>
-
-      <div class="row mb-4">
-        <div class="col-md-5">
-          <input class="form-control mb-2" type="text" id="new-color" placeholder="#FFAA00">
-          <button class="btn btn-secondary" onclick="changeColor()">Change color</button>
-          <button class="btn btn-secondary" onclick="canvas.revertDefaultColor()">Revert</button>
-        </div>
+        <a href="https://www.npmjs.com/package/portraycanvas" class="small-icon mr-2" target="_blank">
+          <img src="https://cdn.jsdelivr.net/npm/simple-icons@v5/icons/npm.svg" />
+        </a>
+        <small>By <a href="http://www.chrisvilches.com/" target="_blank">Chris Vilches</a></small>
       </div>
     </div>
 
-    <script>
+    <div class="row">
+      <div class="mb-2 col-md-6 col-lg-4">
+        <canvas id="canvas-main" height="500" width="500"></canvas>
+      </div>
+
+      <div class="mb-2 col-md-6 col-lg-8">
+        <pre id="lines-data-container"></pre>
+      </div>
+    </div>
+
+    <!-- Do some things programmatically -->
+
+    <div class="row mb-4">
+      <div class="col-md-7">
+        <button class="btn btn-secondary" onclick="canvas.clear()">Clear</button>
+        <button class="btn btn-secondary" onclick="canvas.undo()">Undo line</button>
+        <input type="color" value="#000000" oninput="onChangeColor(this)" />
+      </div>
+    </div>
+  </div>
+
+  <script>
     var canvas;
 
-    function changeColor(){
-      var colorString = document.getElementById('new-color').value || '';
-      colorString = colorString.trim();
-      if(colorString.charAt(0) != '#'){
-        colorString = '#' + colorString;
-      }
-
-      canvas.setColor(colorString);
+    function onChangeColor(ele) {
+      var hexColor = ele.value;
+      canvas.setColor(hexColor);
     }
 
-    function showCurrentLines(){
+    function showCurrentLines() {
       var lines = canvas.getLines();
       var content;
 
-      if(lines.length > 0){
+      if (lines.length > 0) {
         content = JSON.stringify(lines.reverse(), null, 2);
       } else {
         content = '<i>No lines yet.</i>'
@@ -142,21 +135,22 @@
 
       period: 20,
 
-      onLineFinish: function(c){
+      onLineFinish: function (c) {
         showCurrentLines();
       },
 
-      onClear: function(){
+      onClear: function () {
         showCurrentLines();
       },
 
-      onUndo: function(line){
+      onUndo: function (line) {
         showCurrentLines();
       }
     });
 
     showCurrentLines();
 
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>
