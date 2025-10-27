@@ -3,7 +3,7 @@
   "author": {
     "name": "ChrisVilches",
     "email": "felovilches@gmail.com",
-    "url": "http://cloud.chrisvilches.com/live_demos/PortrayCanvas/"
+    "url": "https://portraycanvas.netlify.app/demo-debug-info.html"
   },
   "version": "1.1.1",
   "description": "Parameterizable canvas library that allows you to draw on it, and get the drawn points.",
