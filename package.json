@@ -5,7 +5,7 @@
     "email": "felovilches@gmail.com",
     "url": "https://portraycanvas.netlify.app/demo-debug-info.html"
   },
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Parameterizable canvas library that allows you to draw on it, and get the drawn points.",
   "keywords": [
     "canvas",
